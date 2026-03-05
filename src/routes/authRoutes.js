@@ -46,7 +46,8 @@ router.post("/register", async (req, res) => {
     return res.status(201).json({
       _id: user._id,
       name: user.name,
-      email: user.email
+      email: user.email,
+      createdAt: user.createdAt
     })
     
   } catch (error) {
@@ -63,6 +64,13 @@ router.post("/login", async (req, res) => {
   try {
     
     const { email , password } = req.body
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password required"
+      });
+    }
 
     // - Find user
     const user = await User.findOne({ email })
@@ -84,12 +92,12 @@ router.post("/login", async (req, res) => {
 
     // - Generate JWT
     const token = jwt.sign(
-      { id: user._id },
+      { userId: user._id },
       process.env.JWT_SECRET,
       { expiresIn: "1d" })
 
     // - Return token
-    res.json({ token })
+    return res.status(200).json({ token });
 
   } catch (error) {
     return res.status(500).json({
